@@ -138,7 +138,7 @@ public function panel(Panel $panel): Panel
 ### Basic Configuration
 
 ```php
-AzureSocialitePlugin::make()
+FilamentAzureSocialitePlugin::make()
     ->enabled(true)                    // Enable/disable the plugin
     ->buttonLabel('Login with Microsoft') // Button text
     ->hook('after')                    // 'before' or 'after' the login form
@@ -148,7 +148,7 @@ AzureSocialitePlugin::make()
 ### Security Configuration
 
 ```php
-AzureSocialitePlugin::make()
+FilamentAzureSocialitePlugin::make()
     ->allowedDomains(['company.com', 'partner.com']) // Restrict to specific email domains
     ->allowedTenants(['tenant-id-1', 'tenant-id-2']) // Restrict to specific Azure tenants
 ```
@@ -156,7 +156,7 @@ AzureSocialitePlugin::make()
 ### Custom User Resolution
 
 ```php
-AzureSocialitePlugin::make()
+FilamentAzureSocialitePlugin::make()
     ->resolveUserUsing(function ($azureUser) {
         // Custom logic to find or create user
         return User::firstOrCreate(
@@ -172,7 +172,7 @@ AzureSocialitePlugin::make()
 ### Callbacks
 
 ```php
-AzureSocialitePlugin::make()
+FilamentAzureSocialitePlugin::make()
     ->beforeRedirect(function ($request, $config) {
         // Called before redirecting to Azure
         // You can modify $config here
@@ -219,14 +219,14 @@ The plugin supports multiple Filament panels. Each panel can have its own config
 ```php
 // Admin Panel
 AdminPanelProvider::class => [
-    AzureSocialitePlugin::make()
+    FilamentAzureSocialitePlugin::make()
         ->enabled()
         ->allowedDomains(['admin.company.com'])
 ],
 
 // User Panel
 UserPanelProvider::class => [
-    AzureSocialitePlugin::make()
+    FilamentAzureSocialitePlugin::make()
         ->enabled()
         ->allowedDomains(['company.com'])
         ->allowRegistration(true)
