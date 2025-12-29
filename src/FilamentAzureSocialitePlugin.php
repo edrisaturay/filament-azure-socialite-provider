@@ -8,7 +8,7 @@ use Closure;
 use Filament\Contracts\Plugin as PluginContract;
 use Filament\Panel;
 
-class AzureSocialitePlugin implements PluginContract
+class FilamentAzureSocialitePlugin implements PluginContract
 {
     protected bool $enabled = true;
 

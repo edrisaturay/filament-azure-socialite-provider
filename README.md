@@ -96,13 +96,13 @@ For `AZURE_TENANT_ID`, use:
 In your panel provider (e.g., `app/Providers/Filament/AdminPanelProvider.php`):
 
 ```php
-use EdrisaTuray\FilamentAzureSocialite\AzureSocialitePlugin;
+use EdrisaTuray\FilamentAzureSocialite\FilamentAzureSocialitePlugin;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
         ->plugins([
-            AzureSocialitePlugin::make()
+            FilamentAzureSocialitePlugin::make()
                 ->enabled()
                 ->buttonLabel('Login with Microsoft')
                 ->hook('after') // or 'before'
@@ -118,13 +118,13 @@ public function panel(Panel $panel): Panel
 In your panel provider:
 
 ```php
-use EdrisaTuray\FilamentAzureSocialite\AzureSocialitePlugin;
+use EdrisaTuray\FilamentAzureSocialite\FilamentAzureSocialitePlugin;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
         ->plugins([
-            AzureSocialitePlugin::make()
+            FilamentAzureSocialitePlugin::make()
                 ->enabled()
                 ->buttonLabel('Login with Microsoft')
                 ->hook('after')

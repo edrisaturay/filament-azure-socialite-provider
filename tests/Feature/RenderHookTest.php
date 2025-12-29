@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EdrisaTuray\FilamentAzureSocialite\Tests\Feature;
 
-use EdrisaTuray\FilamentAzureSocialite\AzureSocialitePlugin;
+use EdrisaTuray\FilamentAzureSocialite\FilamentFilamentAzureSocialitePlugin;
 use EdrisaTuray\FilamentAzureSocialite\AzureSocialiteRegistry;
 use EdrisaTuray\FilamentAzureSocialite\Tests\TestCase;
 use Filament\Facades\Filament;
@@ -50,7 +50,7 @@ class RenderHookTest extends TestCase
         $panel = $this->createMock(Panel::class);
         $panel->method('getId')->willReturn('admin');
 
-        $plugin = AzureSocialitePlugin::make()
+        $plugin = FilamentAzureSocialitePlugin::make()
             ->enabled(true)
             ->buttonLabel('Custom Label')
             ->hook('before');
@@ -67,7 +67,7 @@ class RenderHookTest extends TestCase
         $panel = $this->createMock(Panel::class);
         $panel->method('getId')->willReturn('admin');
 
-        $plugin = AzureSocialitePlugin::make()
+        $plugin = FilamentAzureSocialitePlugin::make()
             ->enabled(false);
 
         $plugin->register($panel);

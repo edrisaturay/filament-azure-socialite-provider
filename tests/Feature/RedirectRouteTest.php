@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EdrisaTuray\FilamentAzureSocialite\Tests\Feature;
 
-use EdrisaTuray\FilamentAzureSocialite\AzureSocialitePlugin;
+use EdrisaTuray\FilamentAzureSocialite\FilamentAzureSocialitePlugin;
 use EdrisaTuray\FilamentAzureSocialite\AzureSocialiteRegistry;
 use EdrisaTuray\FilamentAzureSocialite\Tests\TestCase;
 use Illuminate\Support\Facades\Route;
