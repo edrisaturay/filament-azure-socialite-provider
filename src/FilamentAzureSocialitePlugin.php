@@ -57,7 +57,24 @@ class FilamentAzureSocialitePlugin implements PluginContract
 
     public function boot(Panel $panel): void
     {
-        // Nothing to boot
+        $panelId = $panel->getId();
+
+        // Check if plugin is enabled for this panel
+        if (! AzureSocialiteRegistry::isEnabled($panelId)) {
+            return;
+        }
+
+        $hook = AzureSocialiteRegistry::getHook($panelId);
+        $hookName = $hook === 'before' 
+            ? 'panels::auth.login.form.before'
+            : 'panels::auth.login.form.after';
+
+        $panel->renderHook(
+            $hookName,
+            fn () => view('filament-azure-socialite::button', [
+                'panelId' => $panelId,
+            ])
+        );
     }
 
     public function enabled(bool $enabled = true): static

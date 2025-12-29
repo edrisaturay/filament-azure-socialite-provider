@@ -9,7 +9,6 @@ use EdrisaTuray\FilamentAzureSocialite\Console\InstallCommand;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureCallbackController;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureRedirectController;
 use Filament\Facades\Filament;
-use Filament\Panel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -25,9 +24,6 @@ class FilamentAzureSocialiteServiceProvider extends ServiceProvider
 
         // Register routes for each panel
         $this->registerRoutes();
-
-        // Register render hooks
-        $this->registerRenderHooks();
 
         // Register commands
         if ($this->app->runningInConsole()) {
@@ -92,27 +88,5 @@ class FilamentAzureSocialiteServiceProvider extends ServiceProvider
         });
     }
 
-    protected function registerRenderHooks(): void
-    {
-        Filament::serving(function (Panel $panel) {
-            $panelId = $panel->getId();
-
-            if (! AzureSocialiteRegistry::isEnabled($panelId)) {
-                return;
-            }
-
-            $hook = AzureSocialiteRegistry::getHook($panelId);
-            $hookName = $hook === 'before' 
-                ? 'panels::auth.login.form.before'
-                : 'panels::auth.login.form.after';
-
-            $panel->renderHook(
-                $hookName,
-                fn () => view('filament-azure-socialite::button', [
-                    'panelId' => $panelId,
-                ])
-            );
-        });
-    }
 }
 
