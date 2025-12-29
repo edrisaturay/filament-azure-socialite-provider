@@ -51,7 +51,6 @@
             "pestphp/pest": true
         }
     },
-    "minimum-stability": "dev",
     "prefer-stable": true
 }
 
