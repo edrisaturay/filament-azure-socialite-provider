@@ -57,41 +57,8 @@ class FilamentAzureSocialitePlugin implements PluginContract
 
     public function boot(Panel $panel): void
     {
-        $panelId = $panel->getId();
-
-        // Check if plugin is enabled for this panel
-        if (! AzureSocialiteRegistry::isEnabled($panelId)) {
-            return;
-        }
-
-        $hook = AzureSocialiteRegistry::getHook($panelId);
-        $hookName = $hook === 'before' 
-            ? 'panels::auth.login.form.before'
-            : 'panels::auth.login.form.after';
-
-        // Register the render hook with null scope so it applies to all panels
-        // The view will get the current panel ID dynamically
-        $panel->renderHook(
-            $hookName,
-            function () {
-                $currentPanel = \Filament\Facades\Filament::getCurrentPanel();
-                if (! $currentPanel) {
-                    return '';
-                }
-                
-                $currentPanelId = $currentPanel->getId();
-                
-                // Only show button if plugin is enabled for this panel
-                if (! AzureSocialiteRegistry::isEnabled($currentPanelId)) {
-                    return '';
-                }
-                
-                return view('filament-azure-socialite::button', [
-                    'panelId' => $currentPanelId,
-                ]);
-            },
-            null // null scope means it applies to all panels
-        );
+        // Render hooks are now registered in the service provider
+        // This method can be used for other boot-time logic if needed
     }
 
     public function enabled(bool $enabled = true): static

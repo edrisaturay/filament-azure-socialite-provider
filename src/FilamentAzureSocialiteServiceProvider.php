@@ -8,7 +8,9 @@ use EdrisaTuray\FilamentAzureSocialite\Console\DoctorCommand;
 use EdrisaTuray\FilamentAzureSocialite\Console\InstallCommand;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureCallbackController;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureRedirectController;
+use Filament\Events\ServingFilament;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +26,9 @@ class FilamentAzureSocialiteServiceProvider extends ServiceProvider
 
         // Register routes for each panel
         $this->registerRoutes();
+
+        // Register render hooks when Filament is serving
+        $this->registerRenderHooks();
 
         // Register commands
         if ($this->app->runningInConsole()) {
@@ -84,6 +89,35 @@ class FilamentAzureSocialiteServiceProvider extends ServiceProvider
                         Route::get('auth/azure/callback', [AzureCallbackController::class, 'callback'])
                             ->name('auth.azure.callback');
                     });
+            }
+        });
+    }
+
+    protected function registerRenderHooks(): void
+    {
+        // Register hooks when panels are available
+        $this->app->booted(function () {
+            foreach (Filament::getPanels() as $panel) {
+                $panelId = $panel->getId();
+
+                if (! AzureSocialiteRegistry::isEnabled($panelId)) {
+                    continue;
+                }
+
+                $hook = AzureSocialiteRegistry::getHook($panelId);
+                $hookName = $hook === 'before' 
+                    ? 'panels::auth.login.form.before'
+                    : 'panels::auth.login.form.after';
+
+                // Register the hook with null scope so it applies to all panels
+                // The view will check if plugin is enabled for the current panel
+                FilamentView::registerRenderHook(
+                    $hookName,
+                    fn () => view('filament-azure-socialite::button', [
+                        'panelId' => $panelId,
+                    ]),
+                    null // null scope means it applies to all panels
+                );
             }
         });
     }
