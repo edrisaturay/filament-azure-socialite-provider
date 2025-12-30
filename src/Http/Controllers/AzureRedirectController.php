@@ -28,10 +28,6 @@ class AzureRedirectController extends Controller
             abort(404);
         }
 
-        // Compute redirect URI dynamically
-        $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);
-        $fullRedirectUri = url($redirectUri);
-
         // Get Azure config from services config
         $azureConfig = config('services.azure', []);
 
@@ -40,6 +36,15 @@ class AzureRedirectController extends Controller
 
         if (empty($clientId) || empty($clientSecret)) {
             abort(500, 'Azure Socialite is not properly configured. Please check your services.azure configuration.');
+        }
+
+        // Use configured redirect URI if set, otherwise compute dynamically
+        if (! empty($azureConfig['redirect'])) {
+            $fullRedirectUri = $azureConfig['redirect'];
+        } else {
+            // Compute redirect URI dynamically per panel
+            $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);
+            $fullRedirectUri = url($redirectUri);
         }
 
         // Build Socialite config

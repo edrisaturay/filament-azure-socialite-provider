@@ -36,11 +36,16 @@ class AzureCallbackController extends Controller
         }
 
         try {
-            // Compute redirect URI (same as in redirect controller)
-            $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);
-            $fullRedirectUri = url($redirectUri);
-
             $azureConfig = config('services.azure', []);
+
+            // Use configured redirect URI if set, otherwise compute dynamically
+            if (! empty($azureConfig['redirect'])) {
+                $fullRedirectUri = $azureConfig['redirect'];
+            } else {
+                // Compute redirect URI dynamically per panel
+                $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);
+                $fullRedirectUri = url($redirectUri);
+            }
 
             $socialiteConfig = new Config(
                 $azureConfig['client_id'] ?? '',
