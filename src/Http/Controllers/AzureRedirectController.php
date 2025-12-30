@@ -40,7 +40,7 @@ class AzureRedirectController extends Controller
 
         // Use configured redirect URI if set, otherwise compute dynamically
         if (! empty($azureConfig['redirect'])) {
-            $fullRedirectUri = $azureConfig['redirect'];
+            $fullRedirectUri = rtrim($azureConfig['redirect'], '/');
         } else {
             // Compute redirect URI dynamically per panel
             $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);

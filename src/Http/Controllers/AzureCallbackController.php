@@ -35,12 +35,14 @@ class AzureCallbackController extends Controller
             abort(404);
         }
 
+        // Get redirect URI for error logging
+        $azureConfig = config('services.azure', []);
+        $fullRedirectUri = null;
+        
         try {
-            $azureConfig = config('services.azure', []);
-
             // Use configured redirect URI if set, otherwise compute dynamically
             if (! empty($azureConfig['redirect'])) {
-                $fullRedirectUri = $azureConfig['redirect'];
+                $fullRedirectUri = rtrim($azureConfig['redirect'], '/');
             } else {
                 // Compute redirect URI dynamically per panel
                 $redirectUri = route("filament.{$panelId}.auth.azure.callback", [], false);
@@ -127,6 +129,16 @@ class AzureCallbackController extends Controller
             return redirect()->to($intended);
         } catch (InvalidStateException $e) {
             // User canceled or state mismatch
+            if (app()->environment(['local', 'dev', 'testing'])) {
+                Log::warning('Azure Socialite: InvalidStateException', [
+                    'error' => $e->getMessage(),
+                    'panelId' => $panelId,
+                    'redirectUri' => $fullRedirectUri ?? 'not set',
+                    'requestUrl' => $request->fullUrl(),
+                    'queryParams' => $request->query(),
+                ]);
+            }
+
             \Filament\Notifications\Notification::make()
                 ->title('Authentication Canceled')
                 ->body('The authentication process was canceled. Please try again.')
