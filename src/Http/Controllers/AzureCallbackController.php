@@ -96,14 +96,40 @@ class AzureCallbackController extends Controller
             }
 
             // Resolve or create user
+            $email = $azureUser->getEmail();
+            $userClass = config('auth.providers.users.model', \App\Models\User::class);
+            $existingUser = $userClass::where('email', $email)->first();
+            
             $user = $this->resolveUser($panelId, $azureUser);
 
             if (! $user) {
-                \Filament\Notifications\Notification::make()
-                    ->title('Authentication Failed')
-                    ->body('User registration is not allowed.')
-                    ->danger()
-                    ->send();
+                // Provide specific error message based on the situation
+                if ($existingUser) {
+                    // User exists but couldn't be resolved (custom resolver issue)
+                    \Filament\Notifications\Notification::make()
+                        ->title('Authentication Failed')
+                        ->body('Your account exists but could not be authenticated. Please contact support.')
+                        ->danger()
+                        ->send();
+                } else {
+                    // User doesn't exist
+                    $allowRegistration = AzureSocialiteRegistry::getAllowRegistration($panelId);
+                    if ($allowRegistration) {
+                        // Registration is allowed but user creation failed
+                        \Filament\Notifications\Notification::make()
+                            ->title('Authentication Failed')
+                            ->body('Your account could not be created. Please contact support.')
+                            ->danger()
+                            ->send();
+                    } else {
+                        // Registration is not allowed
+                        \Filament\Notifications\Notification::make()
+                            ->title('Access Denied')
+                            ->body('You do not have an account in this system. Please contact your administrator to create an account for you.')
+                            ->danger()
+                            ->send();
+                    }
+                }
 
                 return redirect()->route("filament.{$panelId}.auth.login");
             }
