@@ -8,7 +8,6 @@ use EdrisaTuray\FilamentAzureSocialite\Console\DoctorCommand;
 use EdrisaTuray\FilamentAzureSocialite\Console\InstallCommand;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureCallbackController;
 use EdrisaTuray\FilamentAzureSocialite\Http\Controllers\AzureRedirectController;
-use Filament\Events\ServingFilament;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Event;
