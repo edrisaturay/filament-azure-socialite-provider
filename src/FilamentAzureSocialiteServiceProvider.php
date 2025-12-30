@@ -78,14 +78,32 @@ class FilamentAzureSocialiteServiceProvider extends ServiceProvider
                     continue;
                 }
 
+                // Get Azure config to check for custom redirect URI
+                $azureConfig = config('services.azure', []);
+                
+                // Determine callback path - use custom path from redirect URI if set
+                if (! empty($azureConfig['redirect'])) {
+                    // Extract path from full redirect URI
+                    $redirectUri = $azureConfig['redirect'];
+                    $parsedUrl = parse_url($redirectUri);
+                    $callbackPath = $parsedUrl['path'] ?? 'auth/azure/callback';
+                    
+                    // Remove leading slash if present
+                    $callbackPath = ltrim($callbackPath, '/');
+                } else {
+                    // Default path within panel
+                    $callbackPath = 'auth/azure/callback';
+                }
+
                 Route::middleware($panel->getMiddleware())
-                    ->prefix($panelPath)
                     ->name("filament.{$panelId}.")
-                    ->group(function () use ($panelId) {
-                        Route::get('auth/azure/redirect', [AzureRedirectController::class, 'redirect'])
+                    ->group(function () use ($panelId, $panelPath, $callbackPath) {
+                        // Redirect route stays within panel path
+                        Route::get("{$panelPath}/auth/azure/redirect", [AzureRedirectController::class, 'redirect'])
                             ->name('auth.azure.redirect');
 
-                        Route::get('auth/azure/callback', [AzureCallbackController::class, 'callback'])
+                        // Callback route uses custom path if configured
+                        Route::get($callbackPath, [AzureCallbackController::class, 'callback'])
                             ->name('auth.azure.callback');
                     });
             }
