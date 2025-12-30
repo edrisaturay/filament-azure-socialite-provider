@@ -173,34 +173,76 @@ class AzureCallbackController extends Controller
 
             return redirect()->route("filament.{$panelId}.auth.login");
         } catch (\Laravel\Socialite\Two\ProviderException $e) {
-            // Provider-specific errors
+            // Provider-specific errors (OAuth errors from Azure)
+            $errorMessage = $e->getMessage();
+            
             if (app()->environment(['local', 'dev', 'testing'])) {
                 Log::error('Azure Socialite provider error', [
-                    'error' => $e->getMessage(),
+                    'error' => $errorMessage,
+                    'panelId' => $panelId,
                 ]);
             }
 
-            \Filament\Notifications\Notification::make()
-                ->title('Authentication Failed')
-                ->body('An error occurred during authentication. Please try again.')
-                ->danger()
-                ->send();
+            // Check for specific OAuth errors
+            if (str_contains($errorMessage, 'redirect_uri_mismatch') || str_contains($errorMessage, 'AADSTS50011')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Configuration Error')
+                    ->body('The redirect URI is not configured correctly. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, 'invalid_client') || str_contains($errorMessage, 'AADSTS7000222')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Configuration Error')
+                    ->body('Azure authentication is not properly configured. The client secret may be invalid or expired. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, 'access_denied') || str_contains($errorMessage, 'user_cancelled')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Authentication Canceled')
+                    ->body('You canceled the authentication process. Please try again.')
+                    ->warning()
+                    ->send();
+            } else {
+                \Filament\Notifications\Notification::make()
+                    ->title('Authentication Failed')
+                    ->body('An error occurred during authentication with Microsoft. Please try again.')
+                    ->danger()
+                    ->send();
+            }
 
             return redirect()->route("filament.{$panelId}.auth.login");
         } catch (\Exception $e) {
             // Log error in local/dev
+            $errorMessage = $e->getMessage();
+            
             if (app()->environment(['local', 'dev', 'testing'])) {
                 Log::error('Azure Socialite callback error', [
-                    'error' => $e->getMessage(),
+                    'error' => $errorMessage,
+                    'class' => get_class($e),
                     'trace' => $e->getTraceAsString(),
                 ]);
             }
 
-            \Filament\Notifications\Notification::make()
-                ->title('Authentication Failed')
-                ->body('An error occurred during authentication. Please try again.')
-                ->danger()
-                ->send();
+            // Provide more helpful error messages
+            if (str_contains($errorMessage, 'SQLSTATE') || str_contains($errorMessage, 'database')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Database Error')
+                    ->body('A database error occurred. Please contact support.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, 'not configured') || str_contains($errorMessage, 'missing')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Configuration Error')
+                    ->body('Azure authentication is not properly configured. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } else {
+                \Filament\Notifications\Notification::make()
+                    ->title('Authentication Failed')
+                    ->body('An unexpected error occurred during authentication. Please try again or contact support.')
+                    ->danger()
+                    ->send();
+            }
 
             return redirect()->route("filament.{$panelId}.auth.login");
         }
