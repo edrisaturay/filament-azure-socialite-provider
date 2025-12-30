@@ -224,7 +224,19 @@ class AzureCallbackController extends Controller
             }
 
             // Provide more helpful error messages
-            if (str_contains($errorMessage, 'SQLSTATE') || str_contains($errorMessage, 'database')) {
+            if (str_contains($errorMessage, 'invalid_client') || str_contains($errorMessage, 'AADSTS7000222')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Configuration Error')
+                    ->body('Azure authentication is not properly configured. The client secret may be invalid or expired. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, 'redirect_uri_mismatch') || str_contains($errorMessage, 'AADSTS50011')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Configuration Error')
+                    ->body('The redirect URI is not configured correctly in Azure. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, 'SQLSTATE') || str_contains($errorMessage, 'database')) {
                 \Filament\Notifications\Notification::make()
                     ->title('Database Error')
                     ->body('A database error occurred. Please contact support.')
@@ -234,6 +246,12 @@ class AzureCallbackController extends Controller
                 \Filament\Notifications\Notification::make()
                     ->title('Configuration Error')
                     ->body('Azure authentication is not properly configured. Please contact your administrator.')
+                    ->danger()
+                    ->send();
+            } elseif (str_contains($errorMessage, '401') || str_contains($errorMessage, 'Unauthorized')) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Authentication Error')
+                    ->body('Azure rejected the authentication request. Please check your Azure configuration or contact your administrator.')
                     ->danger()
                     ->send();
             } else {
